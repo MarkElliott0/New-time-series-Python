@@ -6,7 +6,24 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 
 # 1. Data Preparation
 # Data sourced from UKHSA Dashboard (Influenza Weekly Positivity)
-df = pd.read_csv('ukhsa_influenza_positivity.csv')
+import requests
+
+url = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/influenza/geography_types/Nation/geographies/England/metrics/influenza_testing_positivityByWeek"
+
+params = {
+    "format": "json",
+    "page_size": 365
+}
+
+response = requests.get(url, params=params)
+data = response.json()
+
+# The results are contained in the 'results' key
+df = pd.DataFrame(data['results'])
+
+# Include manual data ingestion via csv (if required)
+##df = pd.read_csv('ukhsa_influenza_positivity.csv')
+
 df['date'] = pd.to_datetime(df['date'])
 df.set_index('date', inplace=True)
 df = df.asfreq('W-MON')
